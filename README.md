@@ -32,7 +32,7 @@ s - Liczba plików danych.
   >> g++ -std=c++20 main.cpp particles.cpp -o symulacja
 - po poprawnym skompilowaniu programu uruchom utworzony program "symulacja.exe".
   >> ./symulacja
-- Uruchom skrypt do wizualizacji: Aby uruchomić animację, uruchom skrypt visualize.py:
+- Uruchom skrypt do wizualizacji: Aby uruchomić animację, uruchom skrypt visualisation.py:
   >> python3 visualisation.py
 
 Projekt został stworzony przez Mateusza Roman
