@@ -33,6 +33,6 @@ s - Liczba plików danych.
 - po poprawnym skompilowaniu programu uruchom utworzony program "symulacja.exe".
   >> ./symulacja
 - Uruchom skrypt do wizualizacji: Aby uruchomić animację, uruchom skrypt visualize.py:
-  >> python3 visualize.py
+  >> python3 visualisation.py
 
 Projekt został stworzony przez Mateusza Roman
