@@ -35,7 +35,7 @@ public:
     particles(int n, double l, double v, double r);
     std::string toString() const;
     void saveToFile(const std::string& filename) const;
-    void update(double dt);
+    void update(double dt, double& KineticEnergy, double& Momentum_x, double& Momentum_y);
 };
 
 #endif

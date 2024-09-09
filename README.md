@@ -1,6 +1,6 @@
 # Projekt "Symulacja Gazu 2D"
 
-Ten projekt symuluje ruch cząsteczek dwuwymiarowego gazu doskonałego poruszających się w zamkniętej przestrzeni oraz analizuje właściwości układu, takie jak energia kinetyczna cząsteczek i pęd układu. Wizualizacja jest realizowana przy użyciu animacji w `matplotlib`, a dane cząsteczek są wczytywane z plików tekstowych.
+Ten projekt symuluje ruch cząsteczek dwuwymiarowego gazu doskonałego poruszających się w zamkniętej przestrzeni oraz analizuje właściwości układu, takie jak energia kinetyczna cząsteczek i pęd układu. Wizualizacja jest realizowana przy użyciu animacji w `matplotlib`.
 
 ## Wymagania
 - Kompilator C++
@@ -35,4 +35,4 @@ s - Liczba plików danych.
 - Uruchom skrypt do wizualizacji: Aby uruchomić animację, uruchom skrypt visualisation.py:
   >> python3 visualisation.py
 
-Projekt został stworzony przez Mateusza Roman
+Projekt został stworzony przez Mateusza Roman.

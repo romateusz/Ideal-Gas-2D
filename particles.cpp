@@ -41,34 +41,40 @@ void particle::setVelocity(double new_vx, double new_vy) {
     v_y = new_vy;
 }
 
-// Przypadek zderzenia sprężystego: wymiana prędkości
 void particle::collision(particle& p) {
-    // double tmpx = v_x;
-    // double tmpy = v_y;
-    // v_x = p.getv_x();
-    // v_y = p.getv_y();
-    // p.setVelocity(tmpx, tmpy);
+    // Współrzędne położenia i prędkości cząstek
+    double x1 = x, y1 = y;
+    double x2 = p.getx(), y2 = p.gety();
+    double v1x = v_x, v1y = v_y;
+    double v2x = p.getv_x(), v2y = p.getv_y();
+    
+    // Różnica położenia
+    double dx = x2 - x1;
+    double dy = y2 - y1;
+    double distance = std::sqrt(dx * dx + dy * dy);
+    
+    // Normalizacja wektora różnicy położenia
+    double nx = dx / distance;
+    double ny = dy / distance;
+    
+    // Różnica prędkości
+    double dvx = v2x - v1x;
+    double dvy = v2y - v1y;
+    
+    // Iloczyn skalarny różnicy prędkości i wektora normalnego
+    double dot_product = dvx * nx + dvy * ny;
 
-    double dx = x - p.getx();
-    double dy = y - p.gety();
-    double dvx = p.getv_x() - v_x;
-    double dvy = p.getv_y() - v_y;
-    double distance_squared = dx * dx + dy * dy;
+    // Zmiana prędkości wzdłuż normalnego wektora zderzenia
+    double delta_vx = dot_product * nx;
+    double delta_vy = dot_product * ny;
 
-    double dot_product = dx * dvx + dy * dvy;
-    double factor = dot_product / distance_squared;
+    // Aktualizacja prędkości cząstki 1 (pierwsza cząstka zyskuje prędkość drugiej)
+    v_x += delta_vx;
+    v_y += delta_vy;
 
-    double new_vx = v_x + factor * dx;
-    double new_vy = v_y + factor * dy;
-    double new_vpx = p.getv_x() - factor * dx;
-    double new_vpy = p.getv_y() - factor * dy;
-
-    v_x = new_vx;
-    v_y = new_vy;
-    p.setVelocity(new_vpx, new_vpy);
-
+    // Aktualizacja prędkości cząstki 2 (druga cząstka zyskuje prędkość pierwszej)
+    p.setVelocity(v2x - delta_vx, v2y - delta_vy);
 }
-
 
 
 void particle::separate(particle& p, double l) {
@@ -205,7 +211,7 @@ void particles::saveToFile(const std::string& filename) const {
     }
 }
 
-void particles::update(double dt) {
+void particles::update(double dt, double& KineticEnergy, double& Momentum_x, double& Momentum_y) {
     // Aktualizacja pozycji i prędkości cząsteczek
     for (auto& p : P) {
         double new_x = p.getx() + p.getv_x() * dt;
@@ -230,6 +236,9 @@ void particles::update(double dt) {
         }
 
         p.setPosition(new_x, new_y);
+        KineticEnergy += pow(p.getv_x(),2) + pow(p.getv_y(),2);
+        Momentum_x += p.getv_x();
+        Momentum_y += p.getv_y();
     }
 
     // Sortowanie cząsteczek według osi x
@@ -239,7 +248,7 @@ void particles::update(double dt) {
     }
     std::sort(xSorted.begin(), xSorted.end());
 
-    // Sprawdzanie kolizji
+    // Sprawdzanie kolizji metodą sweep and prune
     for (size_t i = 0; i < xSorted.size(); ++i) {
         int idx1 = xSorted[i].second;
         for (size_t j = i + 1; j < xSorted.size(); ++j) {
