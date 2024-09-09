@@ -21,7 +21,7 @@ public:
     void setPosition(double new_x, double new_y);
     void setVelocity(double new_vx, double new_vy);
     void collision(particle& p);
-    void separate(particle& p);
+    void separate(particle& p, double l);
     std::string toString() const;
 };
 

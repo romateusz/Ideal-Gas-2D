@@ -42,42 +42,129 @@ void particle::setVelocity(double new_vx, double new_vy) {
 }
 
 // Przypadek zderzenia sprężystego: wymiana prędkości
-// SPOSÓB NIEPOPRAWNY (testowy)
 void particle::collision(particle& p) {
-        double temp_vx = v_x;
-        double temp_vy = v_y;
-        v_x = p.getv_x();
-        v_y = p.getv_y();
-        p.setVelocity(temp_vx, temp_vy);
+    // double tmpx = v_x;
+    // double tmpy = v_y;
+    // v_x = p.getv_x();
+    // v_y = p.getv_y();
+    // p.setVelocity(tmpx, tmpy);
+
+    double dx = x - p.getx();
+    double dy = y - p.gety();
+    double dvx = p.getv_x() - v_x;
+    double dvy = p.getv_y() - v_y;
+    double distance_squared = dx * dx + dy * dy;
+
+    double dot_product = dx * dvx + dy * dvy;
+    double factor = dot_product / distance_squared;
+
+    double new_vx = v_x + factor * dx;
+    double new_vy = v_y + factor * dy;
+    double new_vpx = p.getv_x() - factor * dx;
+    double new_vpy = p.getv_y() - factor * dy;
+
+    v_x = new_vx;
+    v_y = new_vy;
+    p.setVelocity(new_vpx, new_vpy);
+
 }
 
-void particle::separate(particle& p) {
+
+
+void particle::separate(particle& p, double l) {
     // Oblicz różnicę w położeniu
     double dx = p.getx() - x;
     double dy = p.gety() - y;
     double distance = std::sqrt(dx * dx + dy * dy);
     double sum_r = r + p.getr();
     
+    // Oblicz overlap
     double overlap = sum_r - distance;
-    double nx = dx / distance;      // znormalizowana różnica w osi X
-    double ny = dy / distance;      // znormalizowana różnica w osi Y
     
-    // Przesuwamy cząstki o połowę nakładającej się odległości
+    // Normalizujemy wektor różnicy położeń
+    double nx = dx / distance; // znormalizowana różnica w osi X
+    double ny = dy / distance; // znormalizowana różnica w osi Y
+    
+    // Przesuwamy cząstki o połowę nakładającej się odległości każdą
     double move_x = overlap * nx / 2;
     double move_y = overlap * ny / 2;
 
-    // Dla cząstki this
-    double adjusted_move_x = std::copysign(move_x, v_x); // Przesunięcie o move_x w kierunku znaku v_x
-    double adjusted_move_y = std::copysign(move_y, v_y); // Przesunięcie o move_y w kierunku znaku v_y
+    // Aktualizujemy pozycje cząstek
+    double new_x1 = x - move_x;
+    double new_y1 = y - move_y;
+    double new_x2 = p.getx() + move_x;
+    double new_y2 = p.gety() + move_y;
 
-    // Dla cząstki p
-    double adjusted_move_x_p = std::copysign(move_x, p.getv_x()); // Przesunięcie o move_x w kierunku znaku v_x
-    double adjusted_move_y_p = std::copysign(move_y, p.getv_y()); // Przesunięcie o move_y w kierunku znaku v_y
+    // Korekta pozycji, gdy cząstki zbliżają się do krawędzi
 
-    // Aktualizacja pozycji cząstek
-    this->setPosition(x + adjusted_move_x, y + adjusted_move_y);
-    p.setPosition(p.getx() - adjusted_move_x_p, p.gety() - adjusted_move_y_p);
+    // Krawędzie dla pierwszej cząstki
+    bool adjusted1 = false;  // Zmienna, by zaznaczyć, czy dokonano korekty
+    if (new_x1 < r) {
+        new_x1 = r;
+        adjusted1 = true;
+    } 
+    if (new_x1 > l - r) {
+        new_x1 = l - r;
+        adjusted1 = true;
+    }
+    if (new_y1 < r) {
+        new_y1 = r;
+        adjusted1 = true;
+    } 
+    if (new_y1 > l - r) {
+        new_y1 = l - r;
+        adjusted1 = true;
+    }
+
+    // Korekta pozycji drugiej cząstki w przypadku, gdy pierwsza została skorygowana
+    if (adjusted1) {
+        // Jeśli pierwsza cząstka została przesunięta do krawędzi, przesuń drugą dalej
+        new_x2 = p.getx() + (overlap + std::abs(new_x1 - x)) * nx;
+        new_y2 = p.gety() + (overlap + std::abs(new_y1 - y)) * ny;
+    }
+
+    // Krawędzie dla drugiej cząstki
+    bool adjusted2 = false;  // Zmienna, by zaznaczyć, czy dokonano korekty
+    if (new_x2 < r) {
+        new_x2 = r;
+        adjusted2 = true;
+    }
+    if (new_x2 > l - r) {
+        new_x2 = l - r;
+        adjusted2 = true;
+    }
+    if (new_y2 < r) {
+        new_y2 = r;
+        adjusted2 = true;
+    }
+    if (new_y2 > l - r) {
+        new_y2 = l - r;
+        adjusted2 = true;
+    }
+
+    // Dodatkowe sprawdzenie, jeśli obie cząstki były skorygowane
+    if (adjusted1 && adjusted2) {
+        // Oblicz, ile trzeba jeszcze przesunąć, aby nie było overlapu
+        double additional_overlap = sum_r - std::sqrt((new_x2 - new_x1) * (new_x2 - new_x1) + 
+                                                    (new_y2 - new_y1) * (new_y2 - new_y1));
+
+        // Przesunięcie cząstek o dodatkową ilość w przeciwnych kierunkach
+        // wzdłuż wektora normalnego
+        double adjust_x = additional_overlap * nx / 2;
+        double adjust_y = additional_overlap * ny / 2;
+
+        // Przesunięcie cząstek - upewnienie się, że nie przekroczą granic
+        if (new_x1 - adjust_x >= r) new_x1 -= adjust_x; 
+        if (new_y1 - adjust_y >= r) new_y1 -= adjust_y;
+        if (new_x2 + adjust_x <= l - r) new_x2 += adjust_x;
+        if (new_y2 + adjust_y <= l - r) new_y2 += adjust_y;
+    }
+
+    // Ustawianie nowych pozycji cząstek
+    this->setPosition(new_x1, new_y1);
+    p.setPosition(new_x2, new_y2);
 }
+
 
 std::string particle::toString() const {
     std::ostringstream oss;
@@ -88,7 +175,7 @@ std::string particle::toString() const {
 particles::particles(int n, double l, double v, double r) : l(l) {
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_real_distribution<> dis_pos(0.0, l);
+    std::uniform_real_distribution<> dis_pos(0.0 + r, l - r);
     std::uniform_real_distribution<> dis_vel(-v, v);
 
     for (int i = 0; i < n; ++i) {
@@ -166,7 +253,7 @@ void particles::update(double dt) {
             // Sprawdzamy kolizję wzdłuż osi y
             if (std::abs(P[idx1].gety() - P[idx2].gety()) <= 2 * P[idx1].getr()) {
                 P[idx1].collision(P[idx2]);
-                P[idx1].separate(P[idx2]);
+                P[idx1].separate(P[idx2], l);
             }
         }
     }

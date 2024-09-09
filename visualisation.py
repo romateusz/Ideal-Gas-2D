@@ -87,6 +87,6 @@ energy_plot = []
 momentum_plot = []
 
 fig = plt.figure(figsize=(14, 10))
-ani = FuncAnimation(fig, update_plot, frames=file_count, fargs=(filenames, energy_plot, momentum_plot, l, r), interval=50)
+ani = FuncAnimation(fig, update_plot, frames=file_count, fargs=(filenames, energy_plot, momentum_plot, l, r), interval=100)
 
 plt.show()

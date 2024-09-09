@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 import matplotlib.patches as patches
+from matplotlib.collections import PatchCollection
 
 # Funkcja do wczytywania danych z pliku
 def load_data(filename):
@@ -17,59 +18,6 @@ def compute_kinetic_energy(velocities):
 # Funkcja do obliczania pędu
 def compute_momentum(velocities):
     return np.sum(velocities, axis=0)
-
-# Funkcja rysująca wykresy
-def update_plot(frame, all_positions, all_velocities, energy_plot, momentum_plot, l, r):
-    plt.clf()
-
-    # Pobierz pozycje i prędkości dla aktualnej klatki
-    positions = all_positions[frame]
-    velocities = all_velocities[frame]
-
-    # Rysowanie pozycji cząsteczek
-    ax1 = plt.subplot(2, 2, 1)
-    ax1.set_xlim(0, l)
-    ax1.set_ylim(0, l)
-    ax1.set_xlabel('X')
-    ax1.set_ylabel('Y')
-    ax1.set_title('Aktualne pozycje cząsteczek')
-    
-    # Dodaj okręgi dla cząsteczek
-    for pos in positions:
-        circle = patches.Circle(pos, r, color='blue', fill=True)
-        ax1.add_patch(circle)
-    
-    # Ustaw proporcje osi na równe
-    ax1.set_aspect('equal', adjustable='box')
-
-    # Rysowanie histogramu prędkości
-    plt.subplot(2, 2, 2)
-    speeds = np.linalg.norm(velocities, axis=1)
-    plt.hist(speeds, bins=30, color='orange', edgecolor='black')
-    plt.title('Histogram prędkości')
-    plt.xlabel('Prędkość')
-    plt.ylabel('Liczba cząsteczek')
-    
-    # Rysowanie energii kinetycznej
-    kinetic_energy = compute_kinetic_energy(velocities)
-    energy_plot.append(kinetic_energy)
-    time = np.arange(len(energy_plot)) * dt
-    plt.subplot(2, 2, 3)
-    plt.plot(time, energy_plot, color='green')
-    plt.title('Energia kinetyczna')
-    plt.xlabel('Czas')
-    plt.ylabel('Energia')
-    
-    # Rysowanie pędu układu
-    momentum = compute_momentum(velocities)
-    momentum_plot.append(np.linalg.norm(momentum))
-    plt.subplot(2, 2, 4)
-    plt.plot(time, momentum_plot, color='red')
-    plt.title('Pęd układu')
-    plt.xlabel('Czas')
-    plt.ylabel('Pęd')
-    
-    plt.tight_layout()
 
 # Parametry
 with open("visual.config", "r") as f:
@@ -96,7 +44,80 @@ for i, filename in enumerate(filenames):
 energy_plot = []
 momentum_plot = []
 
-fig = plt.figure(figsize=(14, 10))
-ani = FuncAnimation(fig, update_plot, frames=file_count, fargs=(all_positions, all_velocities, energy_plot, momentum_plot, l, r), interval=50)
+# Utworzenie figure i osi
+fig, axs = plt.subplots(2, 2, figsize=(14, 10))
+ax1, ax2, ax3, ax4 = axs.flatten()
 
+# Inicjalizacja dla pozycji cząsteczek
+ax1.set_xlim(0, l)
+ax1.set_ylim(0, l)
+ax1.set_xlabel('X')
+ax1.set_ylabel('Y')
+ax1.set_title('Aktualne pozycje cząsteczek')
+ax1.set_aspect('equal', adjustable='box')
+
+# Inicjalizacja dla okręgów
+circles = [patches.Circle((0, 0), r, color='blue') for _ in range(n)]
+patch_collection = PatchCollection(circles, match_original=True)
+ax1.add_collection(patch_collection)
+
+# Inicjalizacja dla histogramu prędkości
+ax2.set_title('Histogram prędkości')
+ax2.set_xlabel('Prędkość')
+ax2.set_ylabel('Liczba cząsteczek')
+
+# Inicjalizacja dla energii kinetycznej
+ax3.set_title('Energia kinetyczna')
+ax3.set_xlabel('Czas')
+ax3.set_ylabel('Energia')
+
+# Inicjalizacja dla pędu układu
+ax4.set_title('Pęd układu')
+ax4.set_xlabel('Czas')
+ax4.set_ylabel('Pęd')
+
+# Inicjalizacja linii do wykresów
+line_energy, = ax3.plot([], [], color='green')
+line_momentum, = ax4.plot([], [], color='red')
+
+# Funkcja aktualizująca
+def update_plot(frame):
+    # Aktualizacja pozycji cząsteczek
+    positions = all_positions[frame]
+    velocities = all_velocities[frame]
+
+    # Aktualizacja okręgów - zmiana położenia
+    for circle, pos in zip(circles, positions):
+        circle.center = pos
+
+    patch_collection.set_paths(circles)  # Aktualizacja PatchCollection
+
+    # Aktualizacja histogramu prędkości
+    ax2.clear()
+    ax2.set_title('Histogram prędkości')
+    ax2.set_xlabel('Prędkość')
+    ax2.set_ylabel('Liczba cząsteczek')
+    speeds = np.linalg.norm(velocities, axis=1)
+    ax2.hist(speeds, bins=30, color='orange', edgecolor='black')
+
+    # Aktualizacja energii kinetycznej
+    kinetic_energy = compute_kinetic_energy(velocities)
+    energy_plot.append(kinetic_energy)
+    time = np.arange(len(energy_plot)) * dt
+    line_energy.set_data(time, energy_plot)
+    ax3.relim()
+    ax3.autoscale_view()
+
+    # Aktualizacja pędu układu
+    momentum = compute_momentum(velocities)
+    momentum_plot.append(np.linalg.norm(momentum))
+    line_momentum.set_data(time, momentum_plot)
+    ax4.relim()
+    ax4.autoscale_view()
+
+# Animacja
+ani = FuncAnimation(fig, update_plot, frames=file_count, interval=100)
+
+# Dopasowanie layoutu
+plt.tight_layout(pad=2)
 plt.show()
