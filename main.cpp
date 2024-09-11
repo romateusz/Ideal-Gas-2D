@@ -5,12 +5,12 @@
 #include <cmath>
 
 int main() {
-    const int n = 500;      // liczba cząsteczek
-    const double l = 100.0; // rozmiar obszaru
-    const double v = 100.0; // maksymalna prędkość początkowa
-    const double r = 0.5;   // promień cząstki
-    const double dt = 0.01; // krok czasowy
-    const int steps = 1000; // liczba kroków symulacji
+    const int n = 4000;         // liczba cząsteczek
+    const double l = 100.0;     // rozmiar obszaru
+    const double v = 50.0;      // maksymalna prędkość początkowa
+    const double r = 0.05;      // promień cząstki
+    const double dt = 0.01;     // krok czasowy
+    const int steps = 1000;     // liczba kroków symulacji
 
     std::ofstream outFile("visual.config");
     outFile << "n," << n << "\n";

@@ -260,7 +260,7 @@ void particles::update(double dt, double& KineticEnergy, double& Momentum_x, dou
             }
 
             // Sprawdzamy kolizję wzdłuż osi y
-            if (std::abs(P[idx1].gety() - P[idx2].gety()) <= 2 * P[idx1].getr()) {
+            if (sqrt(pow((P[idx1].getx() - P[idx2].getx()), 2) + pow((P[idx1].gety() - P[idx2].gety()), 2)) < 2 * P[idx1].getr()) {
                 P[idx1].collision(P[idx2]);
                 P[idx1].separate(P[idx2], l);
             }
