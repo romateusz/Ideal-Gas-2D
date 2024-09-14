@@ -11,7 +11,7 @@ Ten projekt symuluje ruch cząsteczek dwuwymiarowego gazu doskonałego poruszaj�
 
 - particless.h - plik nagłówkowy zawierający definicję klas particle i particles.
   
-- particless.cpp - plik zawierający implementacje powyższych klas.
+- particles.cpp - plik zawierający implementacje powyższych klas.
 - main.cpp - plik korzystający z napisanych wcześniej plików w celu przeprowadzenia symulacji zachowania gazu doskonałego 2D. Automatycznie generuje plik "visual.config" oraz kolejne pliki zawierające obliczone dane z kolejnych kroków czasowych.
   
 - visual.config - plik konfiguracyjny, generowany automatycznie po uruchomieniu programu wygenerowanego po kompilacji, który zawiera następujące parametry symulacji:
