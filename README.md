@@ -24,7 +24,7 @@ s - Liczba plików danych.
 
 - particles_{i}.txt - Pliki danych cząsteczek, gdzie {i} to numer pliku. Każdy plik zawiera dane cząsteczek w formacie:
 
-- visualize.py - Skrypt Python do wizualizacji danych. Używa matplotlib do rysowania animacji i wykresów.
+- visualization.py - Skrypt Python do wizualizacji danych. Używa matplotlib do rysowania animacji i wykresów.
 
 ## Uruchomienie
 
